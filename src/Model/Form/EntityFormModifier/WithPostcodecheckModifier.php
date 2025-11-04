@@ -93,6 +93,10 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             $addition?->getValue() ?? '',
         ), true);
 
+        if (!$postcode?->getValue() || !$housenumber?->getData('value')) {
+            return null;
+        }
+
         if (isset($response['exception'])) {
             $manualMode->setAttribute('data-msg-magewire', $response['exception']);
             $manualMode->setAttribute('data-magewire-is-valid', '0');
