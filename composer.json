@@ -1,6 +1,5 @@
 {
-  "name": "trinos-nl/magento2-postcode-nl",
-  "version": "2.0.1",
+  "name": "vendic/hyva-checkout-postcode-nl-forked",
   "description": "Hyvä Checkout integration for Postcode.nl to validate Dutch addresses at Checkout",
   "type": "magento2-module",
   "require": {
