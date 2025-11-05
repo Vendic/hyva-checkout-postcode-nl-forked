@@ -1,17 +1,13 @@
 ## Trinos - Postcode.nl Magento 2 module
 
-Postcode.nl integration for Hyvä Checkout.
+A Vendic fork for `trinos-nl/magento2-postcode-nl` module.
+It has several improvements over the original module.
 
 ## Installation
 
-1. Add the checkout repository to the Magento `composer.json`
+2. Require the `vendic/hyva-checkout-postcode-nl-forked` package:
     ```sh
-    composer config repositories.trinos-nl/magento2-postcode-nl git git@github.com:trinos-nl/magento2-postcode-nl.git
-    ```
-
-2. Require the `trinos-nl/magento2-postcode-nl` package:
-    ```sh
-    composer require trinos-nl/magento2-postcode-nl
+    composer require vendic/hyva-checkout-postcode-nl-forked
     ```
 
 3. Run `bin/magento setup:upgrade`
@@ -41,3 +37,12 @@ Our recommendation is to set this fields to the following order and configuratio
 | postcodenl_manual_mode | Yes     | No       | 100%   |
 | street.0               | Yes     | Yes      | 100%   |
 | city                   | Yes     | Yes      | 100%   |
+
+## Fixes
+
+As stated above, this module has several fixes compared to the original module
+
+### Preventing validation when `housenumber` empty
+
+When there is either `housenumber` or `postcode` fields empty,
+we don't have to run postcode validation. So we're checking values to be not empty before running the original validation
