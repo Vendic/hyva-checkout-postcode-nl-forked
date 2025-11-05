@@ -87,15 +87,15 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
         $housenumber = $street->getRelatives()[1] ?? null;
         $addition = $street->getRelatives()[2] ?? null;
 
+        if (!$postcode?->getValue() || !$housenumber?->getData('value')) {
+            return null;
+        }
+
         $response = json_decode($this->postcodeManagement->getPostcodeInformation(
             $postcode->getValue() ?? '',
             $housenumber?->getValue() ?? '',
             $addition?->getValue() ?? '',
         ), true);
-
-        if (!$postcode?->getValue() || !$housenumber?->getData('value')) {
-            return null;
-        }
 
         if (isset($response['exception'])) {
             $manualMode->setAttribute('data-msg-magewire', $response['exception']);
