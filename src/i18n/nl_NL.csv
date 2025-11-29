@@ -6,3 +6,5 @@
 "Specified postcode is too short.","De opgegeven postcode is te kort."
 "Specified postcode is too long.","De opgegeven postcode is te lang."
 "Postcode does not use format `1234AB`.","De postcode is niet in het formaat `1234AB`."
+"""%1"" is a required field.","""%1"" is een verplicht veld."
+"Street number","Straatnummer"
