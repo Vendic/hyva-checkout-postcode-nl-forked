@@ -8,3 +8,4 @@
 "Postcode does not use format `1234AB`.","De postcode is niet in het formaat `1234AB`."
 """%1"" is a required field.","""%1"" is een verplicht veld."
 "Street number","Straatnummer"
+Could not connect to the postcode service. Please try again or enter your address manually.,Er kon geen verbinding worden gemaakt met de postcodeservice. Probeer het opnieuw of voer uw adres handmatig in.

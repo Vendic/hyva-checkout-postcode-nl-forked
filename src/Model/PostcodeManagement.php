@@ -3,6 +3,7 @@
 namespace Trinos\PostcodeNL\Model;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Trinos\PostcodeNL\Api\PostcodeManagementInterface;
@@ -43,12 +44,20 @@ class PostcodeManagement implements PostcodeManagementInterface
             $response = $client->request('GET', "/nl/v1/addresses/postcode/$urlEncPostcode/$urlEncHousenumber/$urlEncHousenumberAdd", [
                 'auth' => [$apiKey, $apiSecret],
             ]);
-        } catch (GuzzleException $e) {
+        } catch (BadResponseException $e) {
             $response = json_decode($e->getResponse()->getBody()->getContents(), true);
             if (isset($response['exception'])) {
                 $response['exception'] = __($response['exception']);
             }
+
             return json_encode($response);
+        } catch (GuzzleException $e) {
+            return json_encode([
+                'exception' => __(
+                    'Could not connect to the postcode service. '
+                    . 'Please try again or enter your address manually.'
+                )
+            ]);
         }
 
         return $response->getBody()->getContents();
