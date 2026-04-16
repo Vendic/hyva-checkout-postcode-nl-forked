@@ -40,6 +40,11 @@ class PostcodeManagement implements PostcodeManagementInterface
         $urlEncPostcode = rawurlencode($postcode);
         $urlEncHousenumber = rawurlencode($housenumber);
         $urlEncHousenumberAdd = rawurlencode($housenumberAddition);
+        // Postcode and house number should be always specified
+        if (!$urlEncPostcode || !$urlEncHousenumber) {
+            return '{}';
+        }
+
         try {
             $response = $client->request('GET', "/nl/v1/addresses/postcode/$urlEncPostcode/$urlEncHousenumber/$urlEncHousenumberAdd", [
                 'auth' => [$apiKey, $apiSecret],
