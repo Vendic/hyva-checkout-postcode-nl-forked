@@ -7,6 +7,7 @@ use Hyva\Checkout\Magewire\Checkout\AddressView\MagewireAddressFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 use Magento\Quote\Api\Data\AddressInterface;
+use Trinos\PostcodeNL\Model\Config;
 use Trinos\PostcodeNL\Model\PostcodeManagement;
 
 class WithPostcodecheckModifier implements EntityFormModifierInterface
@@ -15,6 +16,7 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
 
     public function __construct(
         protected PostcodeManagement $postcodeManagement,
+        protected Config $config,
     ) {
     }
 
@@ -65,7 +67,7 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
         $houseNumber?->setAttribute('autocomplete', 'address-line2');
         $addition?->setAttribute('autocomplete', 'address-line3');
 
-        if ($country !== 'NL') {
+        if ($country !== 'NL' || !$this->config->isEnabled()) {
             if ($manualMode) {
                 $form->removeField($manualMode);
             }
@@ -78,6 +80,9 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
 
     public function validatePostcode(EntityFormInterface $form): ?array
     {
+        if (!$this->config->isEnabled()) {
+            return null;
+        }
         $manualMode = $form->getField(self::KEY_MANUAL_MODE);
         if (!$manualMode || $manualMode->getValue()) {
             return null;
@@ -155,7 +160,7 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
     public function postcodeCheck(EntityFormInterface $form, MagewireAddressFormInterface $formComponent): void
     {
         $country = $form->getField(AddressInterface::KEY_COUNTRY_ID)->getValue();
-        if ($country != 'NL') {
+        if ($country != 'NL' || !$this->config->isEnabled()) {
             return;
         }
 
