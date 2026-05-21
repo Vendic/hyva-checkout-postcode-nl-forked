@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php 
+
+declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
@@ -9,9 +11,8 @@ use Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithPostcodecheckModifier;
 
 class WithManualModeModifier implements EntityFormModifierInterface
 {
-    public function __construct(
-        protected Config $config,
-    ) {
+    public function __construct(private readonly Config $config)
+    {
     }
 
     public function apply(EntityFormInterface $form): EntityFormInterface

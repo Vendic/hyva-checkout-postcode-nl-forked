@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model;
 
@@ -7,19 +9,18 @@ use Magento\Store\Model\ScopeInterface;
 
 class Config
 {
-    public const XML_PATH_ENABLED = 'postcodenl_api/general/enabled';
+    public const string XML_PATH_ENABLED = 'postcodenl_api/general/enabled';
 
-    public function __construct(
-        protected ScopeConfigInterface $scopeConfig,
-    ) {
+    public function __construct(private readonly ScopeConfigInterface $scopeConfig)
+    {
     }
 
-    public function isEnabled(?string $scopeCode = null): bool
+    public function isEnabled(?string $storeId = null): bool
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_ENABLED,
             ScopeInterface::SCOPE_STORE,
-            $scopeCode
+            $storeId
         );
     }
 }

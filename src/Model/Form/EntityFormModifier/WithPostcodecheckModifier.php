@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
 use Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm;
@@ -12,11 +14,11 @@ use Trinos\PostcodeNL\Model\PostcodeManagement;
 
 class WithPostcodecheckModifier implements EntityFormModifierInterface
 {
-    public const KEY_MANUAL_MODE = 'postcodenl_manual_mode';
+    public const string KEY_MANUAL_MODE = 'postcodenl_manual_mode';
 
     public function __construct(
-        protected PostcodeManagement $postcodeManagement,
-        protected Config $config,
+        private readonly PostcodeManagement $postcodeManagement,
+        private readonly Config $config,
     ) {
     }
 
