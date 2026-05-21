@@ -1,13 +1,20 @@
-<?php declare(strict_types=1);
+<?php 
+
+declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
+use Trinos\PostcodeNL\Model\Config;
 use Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithPostcodecheckModifier;
 
 class WithManualModeModifier implements EntityFormModifierInterface
 {
+    public function __construct(private readonly Config $config)
+    {
+    }
+
     public function apply(EntityFormInterface $form): EntityFormInterface
     {
         $form->registerModificationListener(
@@ -32,7 +39,7 @@ class WithManualModeModifier implements EntityFormModifierInterface
         $manualMode = $form->getField(WithPostcodecheckModifier::KEY_MANUAL_MODE);
         $countryField = $form->getField('country_id');
 
-        if ($countryField->getValue() !== 'NL') {
+        if ($countryField->getValue() !== 'NL' || !$this->config->isEnabled()) {
             $manualMode?->setValue(true);
             return;
         }
