@@ -5,6 +5,9 @@
     <type name="Hyva\Checkout\Model\ConfigData\HyvaThemes\Checkout">
         <plugin name="trinos_postcodenl_sort_form_fields_mapping" type="Trinos\PostcodeNL\Plugin\SortFormFieldsMapping"/>
     </type>
+    <type name="Hyva\Checkout\Model\Form\AbstractEntityForm">
+        <plugin name="trinos_postcodenl_sort_form_context_elements" type="Trinos\PostcodeNL\Plugin\SortFormContextElements"/>
+    </type>
 
     <type name="Hyva\Checkout\Model\Form\EntityFormFactory">
         <arguments>
