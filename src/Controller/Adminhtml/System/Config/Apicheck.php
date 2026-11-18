@@ -3,20 +3,17 @@
 namespace Trinos\PostcodeNL\Controller\Adminhtml\System\Config;
 
 use GuzzleHttp\Client;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 
-class Apicheck implements HttpGetActionInterface
+class Apicheck extends Action implements HttpGetActionInterface
 {
-    const API_URL = 'https://api.postcode.eu';
+    public const string ADMIN_RESOURCE = 'Trinos_PostcodeNL::config_trinos_postcode';
 
-    public function __construct(
-        protected RequestInterface $request,
-        protected ResultFactory    $resultFactory,
-    ) {
-    }
+    private const string API_URL = 'https://api.postcode.eu';
 
     /**
      * Execute action based on request and return result
@@ -25,8 +22,8 @@ class Apicheck implements HttpGetActionInterface
      */
     public function execute(): ResultInterface
     {
-        $apiKey = $this->request->getParam('apikey');
-        $apiSecret = $this->request->getParam('apisecret');
+        $apiKey = $this->getRequest()->getParam('apikey');
+        $apiSecret = $this->getRequest()->getParam('apisecret');
 
         $result = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
