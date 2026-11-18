@@ -3,6 +3,17 @@
 A Vendic fork for `trinos-nl/magento2-postcode-nl` module.
 It has several improvements over the original module.
 
+## Requirements and versions
+
+| Module version | Hyvä Checkout |
+|----------------|---------------|
+| 2.x            | ^3.0          |
+| 1.x            | ^1.3          |
+
+Version 2.0.0 drops Hyvä Checkout 1.x: its address forms commit the postcode fields with `$wire.$commit()`
+and no longer patch `wire:target` or remove autosave, which Hyvä Checkout 3 handles itself.
+Stores on Hyvä Checkout 1.3 stay on `^1.0`.
+
 ## Installation
 
 2. Require the `vendic/hyva-checkout-postcode-nl-forked` package:

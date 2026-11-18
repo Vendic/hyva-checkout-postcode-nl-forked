@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
-use Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm;
-use Hyva\Checkout\Magewire\Checkout\AddressView\MagewireAddressFormInterface;
+use Hyva\Checkout\Model\Form\EntityFieldInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 use Magento\Quote\Api\Data\AddressInterface;
@@ -49,9 +48,9 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
         );
 
         $form->registerModificationListener(
-            'removeAutoSave',
+            'commitOnChange',
             'form:build:magewire',
-            [$this, 'removeAutoSave']
+            [$this, 'commitOnChange']
         );
 
         return $form;
@@ -114,6 +113,8 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             // The option key should be the same as the label.
             $options = array_combine($response['houseNumberAdditions'], $response['houseNumberAdditions']);
             $addition?->setOptions($options);
+            // The street rows render with the "street" alias; a select needs its own renderer.
+            $addition?->setData(EntityFieldInterface::INPUT_ALIAS, 'select');
         }
 
         return $response;
@@ -136,30 +137,31 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             $street->disable();
             $city->disable();
         }
-
-        foreach ([$postcode, $housenumber, $addition, $manualMode] as $field) {
-            if ($field) {
-                $field->setAttribute('@change.capture', '$wire.store');
-            }
-        }
     }
 
-    public function removeAutoSave(EntityFormInterface $form): void
+    /**
+     * Send the postcode fields to the server on change, so the postcode check runs.
+     * Hyvä Checkout 3 address forms have no autosave, so commit the deferred wire:model updates on change.
+     *
+     * @param EntityFormInterface $form
+     * @return void
+     */
+    public function commitOnChange(EntityFormInterface $form): void
     {
         $manualMode = $form->getField(self::KEY_MANUAL_MODE);
         $postcode = $form->getField(AddressInterface::KEY_POSTCODE);
         $street = $form->getField(AddressInterface::KEY_STREET);
-        $housenumber = $street->getRelatives()[1] ?? null;
-        $addition = $street->getRelatives()[2] ?? null;
+        $housenumber = $street?->getRelatives()[1] ?? null;
+        $addition = $street?->getRelatives()[2] ?? null;
 
         foreach ([$postcode, $housenumber, $addition, $manualMode] as $field) {
             if ($field) {
-                $field->removeAttribute('data-autosave');
+                $field->setAttribute('@change.capture', '$wire.$commit()');
             }
         }
     }
 
-    public function postcodeCheck(EntityFormInterface $form, MagewireAddressFormInterface $formComponent): void
+    public function postcodeCheck(EntityFormInterface $form): void
     {
         $country = $form->getField(AddressInterface::KEY_COUNTRY_ID)->getValue();
         if ($country != 'NL' || !$this->config->isEnabled()) {

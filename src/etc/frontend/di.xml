@@ -28,9 +28,6 @@
                 <item name="with_postcodecheck" sortOrder="501" xsi:type="object">
                     Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithPostcodecheckModifier
                 </item>
-                <item name="with_wire_target_fix" sortOrder="501" xsi:type="object">
-                    Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithWireTargetFixModifier
-                </item>
             </argument>
         </arguments>
     </type>
@@ -43,9 +40,6 @@
                 </item>
                 <item name="with_postcodecheck" sortOrder="501" xsi:type="object">
                     Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithPostcodecheckModifier
-                </item>
-                <item name="with_wire_target_fix" sortOrder="501" xsi:type="object">
-                    Trinos\PostcodeNL\Model\Form\EntityFormModifier\WithWireTargetFixModifier
                 </item>
             </argument>
         </arguments>
