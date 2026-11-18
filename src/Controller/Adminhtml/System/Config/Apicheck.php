@@ -15,11 +15,6 @@ class Apicheck extends Action implements HttpGetActionInterface
 
     const API_URL = 'https://api.postcode.eu';
 
-    public function __construct(Context $context)
-    {
-        parent::__construct($context);
-    }
-
     /**
      * Execute action based on request and return result
      *
