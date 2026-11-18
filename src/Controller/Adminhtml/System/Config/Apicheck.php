@@ -11,9 +11,9 @@ use Magento\Framework\Controller\ResultInterface;
 
 class Apicheck extends Action implements HttpGetActionInterface
 {
-    public const ADMIN_RESOURCE = 'Trinos_PostcodeNL::config_trinos_postcode';
+    public const string ADMIN_RESOURCE = 'Trinos_PostcodeNL::config_trinos_postcode';
 
-    const API_URL = 'https://api.postcode.eu';
+    private const string API_URL = 'https://api.postcode.eu';
 
     /**
      * Execute action based on request and return result
