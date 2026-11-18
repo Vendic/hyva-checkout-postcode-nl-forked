@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
 use Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm;
+use Hyva\Checkout\Model\Form\EntityFieldInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 use Magento\Quote\Api\Data\AddressInterface;
@@ -119,6 +120,8 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             // The option key should be the same as the label.
             $options = array_combine($response['houseNumberAdditions'], $response['houseNumberAdditions']);
             $addition?->setOptions($options);
+            // The street rows render with the "street" alias; a select needs its own renderer.
+            $addition?->setData(EntityFieldInterface::INPUT_ALIAS, 'select');
         }
 
         return $response;
