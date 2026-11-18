@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
-use Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm;
 use Hyva\Checkout\Model\Form\EntityFieldInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
@@ -46,12 +45,6 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             'postcodenlShippingUpdated',
             'form:updated',
             [$this, 'postcodeCheck']
-        );
-
-        $form->registerModificationListener(
-            'removeAutoSave',
-            'form:build:magewire',
-            [$this, 'removeAutoSave']
         );
 
         $form->registerModificationListener(
@@ -148,40 +141,22 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
 
     /**
      * Send the postcode fields to the server on change, so the postcode check runs.
-     * Hyvä Checkout 1.x address forms save through store(); Hyvä Checkout 3 has no store() and commits the
-     * deferred wire:model updates with $commit() instead.
+     * Hyvä Checkout 3 address forms have no autosave, so commit the deferred wire:model updates on change.
      *
      * @param EntityFormInterface $form
-     * @param object|null $component
      * @return void
      */
-    public function commitOnChange(EntityFormInterface $form, ?object $component = null): void
+    public function commitOnChange(EntityFormInterface $form): void
     {
         $manualMode = $form->getField(self::KEY_MANUAL_MODE);
         $postcode = $form->getField(AddressInterface::KEY_POSTCODE);
         $street = $form->getField(AddressInterface::KEY_STREET);
         $housenumber = $street?->getRelatives()[1] ?? null;
         $addition = $street?->getRelatives()[2] ?? null;
-        $commit = $component instanceof AbstractMagewireAddressForm ? '$wire.store' : '$wire.$commit()';
 
         foreach ([$postcode, $housenumber, $addition, $manualMode] as $field) {
             if ($field) {
-                $field->setAttribute('@change.capture', $commit);
-            }
-        }
-    }
-
-    public function removeAutoSave(EntityFormInterface $form): void
-    {
-        $manualMode = $form->getField(self::KEY_MANUAL_MODE);
-        $postcode = $form->getField(AddressInterface::KEY_POSTCODE);
-        $street = $form->getField(AddressInterface::KEY_STREET);
-        $housenumber = $street->getRelatives()[1] ?? null;
-        $addition = $street->getRelatives()[2] ?? null;
-
-        foreach ([$postcode, $housenumber, $addition, $manualMode] as $field) {
-            if ($field) {
-                $field->removeAttribute('data-autosave');
+                $field->setAttribute('@change.capture', '$wire.$commit()');
             }
         }
     }

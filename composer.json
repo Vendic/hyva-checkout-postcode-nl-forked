@@ -4,7 +4,7 @@
   "type": "magento2-module",
   "require": {
     "magento/framework": "*",
-    "hyva-themes/magento2-hyva-checkout": "^1.3 || ^3.0"
+    "hyva-themes/magento2-hyva-checkout": "^3.0"
   },
   "authors": [
     {
