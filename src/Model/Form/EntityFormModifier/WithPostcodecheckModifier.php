@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
 use Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm;
-use Hyva\Checkout\Magewire\Checkout\AddressView\MagewireAddressFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 use Magento\Quote\Api\Data\AddressInterface;
@@ -52,6 +51,12 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             'removeAutoSave',
             'form:build:magewire',
             [$this, 'removeAutoSave']
+        );
+
+        $form->registerModificationListener(
+            'commitOnChange',
+            'form:build:magewire',
+            [$this, 'commitOnChange']
         );
 
         return $form;
@@ -136,10 +141,29 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             $street->disable();
             $city->disable();
         }
+    }
+
+    /**
+     * Send the postcode fields to the server on change, so the postcode check runs.
+     * Hyvä Checkout 1.x address forms save through store(); Hyvä Checkout 3 has no store() and commits the
+     * deferred wire:model updates with $commit() instead.
+     *
+     * @param EntityFormInterface $form
+     * @param object|null $component
+     * @return void
+     */
+    public function commitOnChange(EntityFormInterface $form, ?object $component = null): void
+    {
+        $manualMode = $form->getField(self::KEY_MANUAL_MODE);
+        $postcode = $form->getField(AddressInterface::KEY_POSTCODE);
+        $street = $form->getField(AddressInterface::KEY_STREET);
+        $housenumber = $street?->getRelatives()[1] ?? null;
+        $addition = $street?->getRelatives()[2] ?? null;
+        $commit = $component instanceof AbstractMagewireAddressForm ? '$wire.store' : '$wire.$commit()';
 
         foreach ([$postcode, $housenumber, $addition, $manualMode] as $field) {
             if ($field) {
-                $field->setAttribute('@change.capture', '$wire.store');
+                $field->setAttribute('@change.capture', $commit);
             }
         }
     }
@@ -159,7 +183,7 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
         }
     }
 
-    public function postcodeCheck(EntityFormInterface $form, MagewireAddressFormInterface $formComponent): void
+    public function postcodeCheck(EntityFormInterface $form): void
     {
         $country = $form->getField(AddressInterface::KEY_COUNTRY_ID)->getValue();
         if ($country != 'NL' || !$this->config->isEnabled()) {

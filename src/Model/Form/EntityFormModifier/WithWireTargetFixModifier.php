@@ -17,7 +17,12 @@ class WithWireTargetFixModifier implements EntityFormModifierInterface
         $form->registerModificationListener(
             'fixWireTarget',
             'form:build:magewire',
-            fn (EntityFormInterface $form, AbstractMagewireAddressForm $component) => $this->fixWireTargetAttribute($component, $form)
+            function (EntityFormInterface $form, ?object $component = null): void {
+                // Hyvä Checkout 3 address forms set wire:target themselves.
+                if ($component instanceof AbstractMagewireAddressForm) {
+                    $this->fixWireTargetAttribute($component, $form);
+                }
+            }
         );
 
         return $form;
