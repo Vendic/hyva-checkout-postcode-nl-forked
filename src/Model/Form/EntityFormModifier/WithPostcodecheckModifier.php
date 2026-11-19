@@ -146,6 +146,10 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
 
     public function removeAutoSave(EntityFormInterface $form): void
     {
+        if (!$this->config->isEnabled()) {
+            return;
+        }
+
         $manualMode = $form->getField(self::KEY_MANUAL_MODE);
         $postcode = $form->getField(AddressInterface::KEY_POSTCODE);
         $street = $form->getField(AddressInterface::KEY_STREET);
@@ -194,6 +198,10 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
 
     public function explodeStreetRows(EntityFormInterface $form): void
     {
+        if (!$this->config->isEnabled()) {
+            return;
+        }
+
         $streetField = $form->getField(AddressInterface::KEY_STREET);
         foreach ($streetField->getRelatives() as $relative) {
             // Change id so the field can coexist with the original street field

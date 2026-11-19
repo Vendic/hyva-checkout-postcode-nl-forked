@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Trinos\PostcodeNL\Model\Form\EntityField\EavEntityAddress;
 
 use Hyva\Checkout\Model\Form\EntityField\EavEntityAddress\StreetAttributeField as CoreStreetAttributeField;
+use Magento\Store\Model\ScopeInterface;
+use Trinos\PostcodeNL\Model\Config;
 
 class StreetAttributeField extends CoreStreetAttributeField
 {
@@ -22,6 +24,10 @@ class StreetAttributeField extends CoreStreetAttributeField
      */
     public function getId(): ?string
     {
+        if (!$this->isPostcodeNlEnabled()) {
+            return parent::getId();
+        }
+
         return $this->getData('id') ?? parent::getId();
     }
 
@@ -32,6 +38,15 @@ class StreetAttributeField extends CoreStreetAttributeField
      */
     public function getSortOrder(): int
     {
+        if (!$this->isPostcodeNlEnabled()) {
+            return parent::getSortOrder();
+        }
+
         return $this->getConfig()->getSortOrder();
+    }
+
+    private function isPostcodeNlEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(Config::XML_PATH_ENABLED, ScopeInterface::SCOPE_STORE);
     }
 }
