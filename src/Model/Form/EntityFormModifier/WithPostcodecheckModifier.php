@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Trinos\PostcodeNL\Model\Form\EntityFormModifier;
 
+use Hyva\Checkout\Magewire\Component\AbstractForm;
 use Hyva\Checkout\Model\Form\EntityFieldInterface;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
@@ -14,6 +15,20 @@ use Trinos\PostcodeNL\Model\PostcodeManagement;
 class WithPostcodecheckModifier implements EntityFormModifierInterface
 {
     public const string KEY_MANUAL_MODE = 'postcodenl_manual_mode';
+
+    /**
+     * The form data paths {@see self::commitOnChange()} sends to the server on change: postcode, house number,
+     * house number addition and manual mode.
+     */
+    private const array COMMITTED_PATHS = [
+        AddressInterface::KEY_POSTCODE,
+        AddressInterface::KEY_STREET . '.1',
+        AddressInterface::KEY_STREET . '.2',
+        self::KEY_MANUAL_MODE,
+    ];
+
+    /** @var array<int, true> Components that dispatched "{type}_address_saved" in this request. */
+    private array $dispatched = [];
 
     public function __construct(
         private readonly PostcodeManagement $postcodeManagement,
@@ -51,6 +66,12 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
             'commitOnChange',
             'form:build:magewire',
             [$this, 'commitOnChange']
+        );
+
+        $form->registerModificationListener(
+            'dispatchAddressSavedOnPostcodeUpdate',
+            'form:updated:data:magewire',
+            [$this, 'dispatchAddressSavedOnPostcodeUpdate']
         );
 
         return $form;
@@ -159,6 +180,48 @@ class WithPostcodecheckModifier implements EntityFormModifierInterface
                 $field->setAttribute('@change.capture', '$wire.$commit()');
             }
         }
+    }
+
+    /**
+     * Let the shipping and payment methods and the totals follow a postcode change or a postcode lookup.
+     *
+     * Hyvä Checkout 3 autosaves the inline address form at the end of every request that updates it, but that
+     * autosave tells no other component: only an explicit submit dispatches "{type}_address_saved". Shipping rates
+     * depend on the postcode, so the method list kept the rates of the previous postcode until it re-rendered for
+     * another reason. Hyvä's own WithCountryModifier solves this for the country select the same way; this does it
+     * for the fields {@see self::commitOnChange()} commits.
+     *
+     * Dispatched while the update is handled, because Magewire collects the events of a component before it runs
+     * its dehydrate() (which autosaves). The listeners refresh in a request of their own, after this one saved.
+     *
+     * @param EntityFormInterface $form
+     * @param AbstractForm|null $component
+     * @param mixed $value
+     * @param string|null $path the updated form data path, e.g. "postcode" or "street.1"
+     * @return void
+     */
+    public function dispatchAddressSavedOnPostcodeUpdate(
+        EntityFormInterface $form,
+        ?AbstractForm $component = null,
+        mixed $value = null,
+        ?string $path = null
+    ): void {
+        // In the address modal the form is a draft that isn't autosaved, so there is nothing to refresh for yet.
+        if ($component === null || $component->editing || !$component->autosave) {
+            return;
+        }
+
+        if (!in_array($path, self::COMMITTED_PATHS, true)) {
+            return;
+        }
+
+        // A commit sends every changed field at once: dispatch once per request.
+        if (isset($this->dispatched[spl_object_id($component)])) {
+            return;
+        }
+
+        $this->dispatched[spl_object_id($component)] = true;
+        $component->dispatch(sprintf('%s_address_saved', $form->getNamespace()));
     }
 
     public function postcodeCheck(EntityFormInterface $form): void
