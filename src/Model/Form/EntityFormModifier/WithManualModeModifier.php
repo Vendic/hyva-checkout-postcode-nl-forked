@@ -20,7 +20,7 @@ class WithManualModeModifier implements EntityFormModifierInterface
         $form->registerModificationListener(
             'setManualMode',
             'form:boot',
-            [$this, 'setManualMode']
+            [$this, 'setManualModeOnBoot']
         );
         $form->registerModificationListener(
             'setManualModeAfterCountryChange',
@@ -32,7 +32,24 @@ class WithManualModeModifier implements EntityFormModifierInterface
     }
 
     /**
-     * Set manual mode to true if the country is not NL, so the postcode check is disabled.
+     * Turn manual mode on if the country is not NL, so the postcode check is disabled. Leave an NL address as it is.
+     *
+     * Hyvä Checkout 3 dispatches "form:boot" on every request to the form, after filling it with the values the
+     * browser holds. Turning manual mode off here would undo the customer's choice on the next request: the first
+     * postcode change in manual mode would disable street and city again and run the postcode check.
+     *
+     * @param EntityFormInterface $form
+     * @return void
+     */
+    public function setManualModeOnBoot(EntityFormInterface $form): void
+    {
+        if ($form->getField('country_id')?->getValue() !== 'NL' || !$this->config->isEnabled()) {
+            $form->getField(WithPostcodecheckModifier::KEY_MANUAL_MODE)?->setValue(true);
+        }
+    }
+
+    /**
+     * Set manual mode to true if the country is not NL, so the postcode check is disabled, and to false for NL.
      */
     public function setManualMode(EntityFormInterface $form): void
     {
