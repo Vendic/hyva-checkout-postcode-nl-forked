@@ -5,15 +5,24 @@ namespace Trinos\PostcodeNL\Controller\Adminhtml\System\Config;
 use GuzzleHttp\Client;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Trinos\PostcodeNL\Model\Config;
 
 class Apicheck extends Action implements HttpGetActionInterface
 {
     public const string ADMIN_RESOURCE = 'Trinos_PostcodeNL::config_trinos_postcode';
 
     private const string API_URL = 'https://api.postcode.eu';
+
+    public function __construct(
+        Context $context,
+        private readonly Config $config
+    ) {
+        parent::__construct($context);
+    }
 
     /**
      * Execute action based on request and return result
@@ -23,7 +32,11 @@ class Apicheck extends Action implements HttpGetActionInterface
     public function execute(): ResultInterface
     {
         $apiKey = $this->getRequest()->getParam('apikey');
-        $apiSecret = $this->getRequest()->getParam('apisecret');
+        $apiSecret = (string)$this->getRequest()->getParam('apisecret');
+        // The secret field shows asterisks for a saved secret: check the saved one then.
+        if (preg_match('/^\*+$/', $apiSecret)) {
+            $apiSecret = $this->config->getApiSecret();
+        }
 
         $result = $this->resultFactory->create(ResultFactory::TYPE_JSON);
 
