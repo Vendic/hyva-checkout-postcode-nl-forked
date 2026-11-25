@@ -6,7 +6,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
 use Trinos\PostcodeNL\Api\PostcodeManagementInterface;
 
 /**
@@ -19,6 +18,7 @@ class PostcodeManagement implements PostcodeManagementInterface
 
     public function __construct(
         protected ScopeConfigInterface $scopeConfig,
+        private readonly Config $config,
     ) {
     }
 
@@ -35,8 +35,8 @@ class PostcodeManagement implements PostcodeManagementInterface
             'timeout' => 3.0,
         ]);
 
-        $apiKey = $this->scopeConfig->getValue('postcodenl_api/general/api_key', ScopeInterface::SCOPE_STORE);
-        $apiSecret = $this->scopeConfig->getValue('postcodenl_api/general/api_secret', ScopeInterface::SCOPE_STORE);
+        $apiKey = $this->config->getApiKey();
+        $apiSecret = $this->config->getApiSecret();
 
         $urlEncPostcode = rawurlencode($postcode);
         $urlEncHousenumber = rawurlencode($housenumber);
